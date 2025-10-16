@@ -12,38 +12,68 @@
     },
     {
       "cell_type": "markdown",
+      "id": "b2d5d6fd",
       "metadata": {
-        "id": "Vl6q8JNWxyov"
+        "id": "b2d5d6fd"
       },
       "source": [
-        "###  Xgboost for binary classification\n",
-        "### Data contains information about invoice payment, it indicates if the invoice was paid on time and if it was delayed — how long was the delay. Decision column is assigned with 0 if the invoice was paid on time or delay was small."
+        "# HW1 Sol"
       ]
     },
     {
       "cell_type": "code",
       "execution_count": null,
+      "id": "490ed5ee",
       "metadata": {
-        "id": "9Bk7fXcYxyox"
+        "id": "490ed5ee"
       },
       "outputs": [],
       "source": [
         "import pandas as pd\n",
-        "from sklearn.model_selection import train_test_split\n",
-        "import xgboost as xgb\n",
-        "from sklearn.metrics import accuracy_score\n",
-        "from matplotlib import pyplot\n",
-        "\n",
-        "import warnings\n",
-        "warnings.filterwarnings('ignore')"
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "96b810f2",
+      "metadata": {
+        "id": "96b810f2"
+      },
+      "source": [
+        "## Q1"
       ]
     },
     {
       "cell_type": "code",
       "execution_count": null,
+      "id": "b598936f",
       "metadata": {
-        "id": "7Rhbs5lNxyoy",
-        "outputId": "bc0aea1c-712f-4774-cf6b-2c76c989f163"
+        "id": "b598936f"
+      },
+      "outputs": [],
+      "source": [
+        "# dataset\n",
+        "data1=pd.read_csv(\"https://raw.githubusercontent.com/wangx346/MAS651/main/customer_lifetime_value.csv\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "47ebcbdc",
+      "metadata": {
+        "id": "47ebcbdc"
+      },
+      "source": [
+        "### 1.1 Display the last 5 records."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "2f9090a6",
+      "metadata": {
+        "id": "2f9090a6",
+        "outputId": "7e4703d6-7e99-4848-bb77-a0d6409d8378"
       },
       "outputs": [
         {
@@ -67,65 +97,114 @@
               "  <thead>\n",
               "    <tr style=\"text-align: right;\">\n",
               "      <th></th>\n",
-              "      <th>invoice_risk_decision</th>\n",
-              "      <th>customer</th>\n",
-              "      <th>payment_due_date</th>\n",
-              "      <th>payment_date</th>\n",
-              "      <th>grand_total</th>\n",
+              "      <th>Customer</th>\n",
+              "      <th>Clv</th>\n",
+              "      <th>Coverage</th>\n",
+              "      <th>Education</th>\n",
+              "      <th>EmploymentStatus</th>\n",
+              "      <th>Gender</th>\n",
+              "      <th>Income</th>\n",
+              "      <th>Location</th>\n",
+              "      <th>Marital</th>\n",
+              "      <th>Policiesnum</th>\n",
+              "      <th>Policytype</th>\n",
+              "      <th>Saleschannel</th>\n",
               "    </tr>\n",
               "  </thead>\n",
               "  <tbody>\n",
               "    <tr>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>id_24</td>\n",
+              "      <th>9129</th>\n",
+              "      <td>LA72316</td>\n",
+              "      <td>23405.987980</td>\n",
+              "      <td>Basic</td>\n",
+              "      <td>Bachelor</td>\n",
+              "      <td>Employed</td>\n",
+              "      <td>M</td>\n",
+              "      <td>71941</td>\n",
+              "      <td>Urban</td>\n",
+              "      <td>Married</td>\n",
               "      <td>2</td>\n",
-              "      <td>2</td>\n",
-              "      <td>64.25</td>\n",
+              "      <td>Personal Auto</td>\n",
+              "      <td>Web</td>\n",
               "    </tr>\n",
               "    <tr>\n",
+              "      <th>9130</th>\n",
+              "      <td>PK87824</td>\n",
+              "      <td>3096.511217</td>\n",
+              "      <td>Extended</td>\n",
+              "      <td>College</td>\n",
+              "      <td>Employed</td>\n",
+              "      <td>F</td>\n",
+              "      <td>21604</td>\n",
+              "      <td>Suburban</td>\n",
+              "      <td>Divorced</td>\n",
               "      <td>1</td>\n",
-              "      <td>0</td>\n",
-              "      <td>id_11</td>\n",
-              "      <td>3</td>\n",
-              "      <td>3</td>\n",
-              "      <td>50.34</td>\n",
+              "      <td>Corporate Auto</td>\n",
+              "      <td>Branch</td>\n",
               "    </tr>\n",
               "    <tr>\n",
+              "      <th>9131</th>\n",
+              "      <td>TD14365</td>\n",
+              "      <td>8163.890428</td>\n",
+              "      <td>Extended</td>\n",
+              "      <td>Bachelor</td>\n",
+              "      <td>Unemployed</td>\n",
+              "      <td>M</td>\n",
+              "      <td>0</td>\n",
+              "      <td>Suburban</td>\n",
+              "      <td>Single</td>\n",
               "      <td>2</td>\n",
-              "      <td>0</td>\n",
-              "      <td>id_29</td>\n",
-              "      <td>4</td>\n",
-              "      <td>4</td>\n",
-              "      <td>40.03</td>\n",
+              "      <td>Corporate Auto</td>\n",
+              "      <td>Branch</td>\n",
               "    </tr>\n",
               "    <tr>\n",
+              "      <th>9132</th>\n",
+              "      <td>UP19263</td>\n",
+              "      <td>7524.442436</td>\n",
+              "      <td>Extended</td>\n",
+              "      <td>College</td>\n",
+              "      <td>Employed</td>\n",
+              "      <td>M</td>\n",
+              "      <td>21941</td>\n",
+              "      <td>Suburban</td>\n",
+              "      <td>Married</td>\n",
               "      <td>3</td>\n",
-              "      <td>0</td>\n",
-              "      <td>id_28</td>\n",
-              "      <td>4</td>\n",
-              "      <td>2</td>\n",
-              "      <td>94.86</td>\n",
+              "      <td>Personal Auto</td>\n",
+              "      <td>Branch</td>\n",
               "    </tr>\n",
               "    <tr>\n",
-              "      <td>4</td>\n",
+              "      <th>9133</th>\n",
+              "      <td>Y167826</td>\n",
+              "      <td>2611.836866</td>\n",
+              "      <td>Extended</td>\n",
+              "      <td>College</td>\n",
+              "      <td>Unemployed</td>\n",
+              "      <td>M</td>\n",
+              "      <td>0</td>\n",
+              "      <td>Suburban</td>\n",
+              "      <td>Single</td>\n",
               "      <td>1</td>\n",
-              "      <td>id_13</td>\n",
-              "      <td>2</td>\n",
-              "      <td>8</td>\n",
-              "      <td>65.15</td>\n",
+              "      <td>Corporate Auto</td>\n",
+              "      <td>Call Center</td>\n",
               "    </tr>\n",
               "  </tbody>\n",
               "</table>\n",
               "</div>"
             ],
             "text/plain": [
-              "   invoice_risk_decision customer  payment_due_date  payment_date  grand_total\n",
-              "0                      0    id_24                 2             2        64.25\n",
-              "1                      0    id_11                 3             3        50.34\n",
-              "2                      0    id_29                 4             4        40.03\n",
-              "3                      0    id_28                 4             2        94.86\n",
-              "4                      1    id_13                 2             8        65.15"
+              "     Customer           Clv  Coverage Education EmploymentStatus Gender  \\\n",
+              "9129  LA72316  23405.987980     Basic  Bachelor         Employed      M   \n",
+              "9130  PK87824   3096.511217  Extended   College         Employed      F   \n",
+              "9131  TD14365   8163.890428  Extended  Bachelor       Unemployed      M   \n",
+              "9132  UP19263   7524.442436  Extended   College         Employed      M   \n",
+              "9133  Y167826   2611.836866  Extended   College       Unemployed      M   \n",
+              "\n",
+              "      Income Location   Marital   Policiesnum      Policytype Saleschannel  \n",
+              "9129   71941     Urban   Married            2   Personal Auto          Web  \n",
+              "9130   21604  Suburban  Divorced            1  Corporate Auto       Branch  \n",
+              "9131       0  Suburban    Single            2  Corporate Auto       Branch  \n",
+              "9132   21941  Suburban   Married            3   Personal Auto       Branch  \n",
+              "9133       0  Suburban    Single            1  Corporate Auto  Call Center  "
             ]
           },
           "execution_count": 3,
@@ -134,37 +213,60 @@
         }
       ],
       "source": [
-        "df = pd.read_csv('https://raw.githubusercontent.com/wangx346/MAS651/main/invoice2.csv')\n",
-        "df.head()"
-      ]
-    },
-    {
-      "cell_type": "code",
-      "execution_count": null,
-      "metadata": {
-        "id": "EM7QoFJuxyoy"
-      },
-      "outputs": [],
-      "source": [
-        "print('Number of rows in dataset:')\n",
-        "print(df[df.columns[0]].value_counts())"
+        "data1.tail(5)"
       ]
     },
     {
       "cell_type": "markdown",
+      "id": "6afc3805",
       "metadata": {
-        "id": "3D6-rNhbxyoz"
+        "id": "6afc3805"
       },
       "source": [
-        "##### XGBoost works with numerical (continuous) data. Categorical features must be translated to numeric representation. Pandas library provide get_dummies function which helps to encode categorical data into an array of (0,1). Here I will translate categorical feature customer_id"
+        "### 1.2 Find the number of rows and columns of the data."
       ]
     },
     {
       "cell_type": "code",
       "execution_count": null,
+      "id": "7b292e2b",
       "metadata": {
-        "id": "DyhFyoboxyoz",
-        "outputId": "485d1a38-63fb-4116-e8cd-694fe6c3ee17"
+        "id": "7b292e2b",
+        "outputId": "d7676671-828e-4157-c2b0-46d33a91742f"
+      },
+      "outputs": [
+        {
+          "data": {
+            "text/plain": [
+              "(9134, 12)"
+            ]
+          },
+          "execution_count": 4,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "data1.shape"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "96335d51",
+      "metadata": {
+        "id": "96335d51"
+      },
+      "source": [
+        "### 1.3 Output basic statistics for the numeric columns."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "42025725",
+      "metadata": {
+        "id": "42025725",
+        "outputId": "8a37dc67-01c9-4a19-cdb6-bf6529bf4909"
       },
       "outputs": [
         {
@@ -188,192 +290,108 @@
               "  <thead>\n",
               "    <tr style=\"text-align: right;\">\n",
               "      <th></th>\n",
-              "      <th>invoice_risk_decision</th>\n",
-              "      <th>payment_due_date</th>\n",
-              "      <th>payment_date</th>\n",
-              "      <th>grand_total</th>\n",
-              "      <th>customer_id_11</th>\n",
-              "      <th>customer_id_12</th>\n",
-              "      <th>customer_id_13</th>\n",
-              "      <th>customer_id_14</th>\n",
-              "      <th>customer_id_15</th>\n",
-              "      <th>customer_id_18</th>\n",
-              "      <th>...</th>\n",
-              "      <th>customer_id_45</th>\n",
-              "      <th>customer_id_46</th>\n",
-              "      <th>customer_id_47</th>\n",
-              "      <th>customer_id_48</th>\n",
-              "      <th>customer_id_49</th>\n",
-              "      <th>customer_id_50</th>\n",
-              "      <th>customer_id_6</th>\n",
-              "      <th>customer_id_7</th>\n",
-              "      <th>customer_id_8</th>\n",
-              "      <th>customer_id_9</th>\n",
+              "      <th>Clv</th>\n",
+              "      <th>Income</th>\n",
+              "      <th>Policiesnum</th>\n",
               "    </tr>\n",
               "  </thead>\n",
               "  <tbody>\n",
               "    <tr>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>2</td>\n",
-              "      <td>2</td>\n",
-              "      <td>64.25</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>...</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
+              "      <th>count</th>\n",
+              "      <td>9134.000000</td>\n",
+              "      <td>9134.000000</td>\n",
+              "      <td>9134.000000</td>\n",
               "    </tr>\n",
               "    <tr>\n",
-              "      <td>1</td>\n",
-              "      <td>0</td>\n",
-              "      <td>3</td>\n",
-              "      <td>3</td>\n",
-              "      <td>50.34</td>\n",
-              "      <td>1</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>...</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
+              "      <th>mean</th>\n",
+              "      <td>8004.940475</td>\n",
+              "      <td>37657.380009</td>\n",
+              "      <td>2.966170</td>\n",
               "    </tr>\n",
               "    <tr>\n",
-              "      <td>2</td>\n",
-              "      <td>0</td>\n",
-              "      <td>4</td>\n",
-              "      <td>4</td>\n",
-              "      <td>40.03</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>...</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
+              "      <th>std</th>\n",
+              "      <td>6870.967608</td>\n",
+              "      <td>30379.904734</td>\n",
+              "      <td>2.390182</td>\n",
               "    </tr>\n",
               "    <tr>\n",
-              "      <td>3</td>\n",
-              "      <td>0</td>\n",
-              "      <td>4</td>\n",
-              "      <td>2</td>\n",
-              "      <td>94.86</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>...</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
+              "      <th>min</th>\n",
+              "      <td>1898.007675</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>1.000000</td>\n",
               "    </tr>\n",
               "    <tr>\n",
-              "      <td>4</td>\n",
-              "      <td>1</td>\n",
-              "      <td>2</td>\n",
-              "      <td>8</td>\n",
-              "      <td>65.15</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>1</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>...</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
-              "      <td>0</td>\n",
+              "      <th>25%</th>\n",
+              "      <td>3994.251794</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>1.000000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>50%</th>\n",
+              "      <td>5780.182197</td>\n",
+              "      <td>33889.500000</td>\n",
+              "      <td>2.000000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>75%</th>\n",
+              "      <td>8962.167041</td>\n",
+              "      <td>62320.000000</td>\n",
+              "      <td>4.000000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>max</th>\n",
+              "      <td>83325.381190</td>\n",
+              "      <td>99981.000000</td>\n",
+              "      <td>9.000000</td>\n",
               "    </tr>\n",
               "  </tbody>\n",
               "</table>\n",
-              "<p>5 rows × 44 columns</p>\n",
               "</div>"
             ],
             "text/plain": [
-              "   invoice_risk_decision  payment_due_date  payment_date  grand_total  \\\n",
-              "0                      0                 2             2        64.25   \n",
-              "1                      0                 3             3        50.34   \n",
-              "2                      0                 4             4        40.03   \n",
-              "3                      0                 4             2        94.86   \n",
-              "4                      1                 2             8        65.15   \n",
-              "\n",
-              "   customer_id_11  customer_id_12  customer_id_13  customer_id_14  \\\n",
-              "0               0               0               0               0   \n",
-              "1               1               0               0               0   \n",
-              "2               0               0               0               0   \n",
-              "3               0               0               0               0   \n",
-              "4               0               0               1               0   \n",
-              "\n",
-              "   customer_id_15  customer_id_18  ...  customer_id_45  customer_id_46  \\\n",
-              "0               0               0  ...               0               0   \n",
-              "1               0               0  ...               0               0   \n",
-              "2               0               0  ...               0               0   \n",
-              "3               0               0  ...               0               0   \n",
-              "4               0               0  ...               0               0   \n",
-              "\n",
-              "   customer_id_47  customer_id_48  customer_id_49  customer_id_50  \\\n",
-              "0               0               0               0               0   \n",
-              "1               0               0               0               0   \n",
-              "2               0               0               0               0   \n",
-              "3               0               0               0               0   \n",
-              "4               0               0               0               0   \n",
-              "\n",
-              "   customer_id_6  customer_id_7  customer_id_8  customer_id_9  \n",
-              "0              0              0              0              0  \n",
-              "1              0              0              0              0  \n",
-              "2              0              0              0              0  \n",
-              "3              0              0              0              0  \n",
-              "4              0              0              0              0  \n",
-              "\n",
-              "[5 rows x 44 columns]"
+              "                Clv        Income  Policiesnum\n",
+              "count   9134.000000   9134.000000  9134.000000\n",
+              "mean    8004.940475  37657.380009     2.966170\n",
+              "std     6870.967608  30379.904734     2.390182\n",
+              "min     1898.007675      0.000000     1.000000\n",
+              "25%     3994.251794      0.000000     1.000000\n",
+              "50%     5780.182197  33889.500000     2.000000\n",
+              "75%     8962.167041  62320.000000     4.000000\n",
+              "max    83325.381190  99981.000000     9.000000"
+            ]
+          },
+          "execution_count": 5,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "data1.describe()"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "0564ffe9",
+      "metadata": {
+        "id": "0564ffe9"
+      },
+      "source": [
+        "### 1.4 Find the mean and standard deviation of the variable Clv, which denotes customer lifetime value."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "d83b440b",
+      "metadata": {
+        "id": "d83b440b",
+        "outputId": "3cd69820-d9d3-4802-cbf2-003888ece207"
+      },
+      "outputs": [
+        {
+          "data": {
+            "text/plain": [
+              "8004.9404749870755"
             ]
           },
           "execution_count": 6,
@@ -382,193 +400,127 @@
         }
       ],
       "source": [
-        "# create dummy variables\n",
-        "encoded_data = pd.get_dummies(df)\n",
-        "encoded_data.head()"
+        "# mean\n",
+        "data1['Clv'].mean()"
       ]
     },
     {
       "cell_type": "code",
       "execution_count": null,
+      "id": "a9859389",
       "metadata": {
-        "id": "E5JZ7boKxyoz"
-      },
-      "outputs": [],
-      "source": [
-        "# split data into X and y\n",
-        "X = encoded_data.iloc[:, 1:44]\n",
-        "Y = encoded_data.iloc[:, 0:1]"
-      ]
-    },
-    {
-      "cell_type": "code",
-      "execution_count": null,
-      "metadata": {
-        "id": "tYLTqyW9xyo0",
-        "outputId": "073724e8-bf5a-450f-e420-f7ba23795e6e"
+        "id": "a9859389",
+        "outputId": "873d130c-8e29-4b2d-c0ea-b925eb1469a1"
       },
       "outputs": [
         {
-          "name": "stdout",
-          "output_type": "stream",
-          "text": [
-            "(275, 43) (31, 43)\n",
-            "\n",
-            "Number of rows in Train dataset:\n",
-            "0    154\n",
-            "1    121\n",
-            "Name: invoice_risk_decision, dtype: int64\n",
-            "\n",
-            "Number of rows in Test dataset:\n",
-            "0    17\n",
-            "1    14\n",
-            "Name: invoice_risk_decision, dtype: int64\n"
-          ]
+          "data": {
+            "text/plain": [
+              "6870.967608356924"
+            ]
+          },
+          "execution_count": 7,
+          "metadata": {},
+          "output_type": "execute_result"
         }
       ],
       "source": [
-        "## get a list of all the column names in a Pandas DataFrame:\n",
-        "headers = list(X)\n",
-        "\n",
-        "\n",
-        "## create training data sets and testing data sets\n",
-        "train_x, test_x, train_Y, test_Y = train_test_split(X, Y, test_size=0.1, stratify=Y, random_state=0)\n",
-        "\n",
-        "print(train_x.shape, test_x.shape)\n",
-        "print()\n",
-        "print('Number of rows in Train dataset:')\n",
-        "print(train_Y['invoice_risk_decision'].value_counts())\n",
-        "print()\n",
-        "print('Number of rows in Test dataset:')\n",
-        "print(test_Y['invoice_risk_decision'].value_counts())"
+        "# std\n",
+        "data1['Clv'].std()"
       ]
     },
     {
       "cell_type": "markdown",
+      "id": "ba13eddf",
       "metadata": {
-        "id": "uTxERVqjxyo0"
+        "id": "ba13eddf"
       },
       "source": [
-        "#####  Using XGBoost feature of training self-evaluation and early stopping to avoid overfitting. Along with training data, passing test data too into ML model build function — model.fit. The function is assigned with 10 early stopping rounds. If there is no improvement in 10 rounds, training will stop and choose the most optimal model. Using logloss metric to evaluate training quality. Training is running with verbose=True flag to print detail output for each training iteration:"
+        "### 1.5 Extract the column Education and print the first 7 records."
       ]
     },
     {
       "cell_type": "code",
       "execution_count": null,
+      "id": "e1a86581",
       "metadata": {
-        "id": "75RmnEztxyo0",
-        "outputId": "a4b41b5b-b2db-4ce0-8b72-2953d24cc95e"
+        "id": "e1a86581",
+        "outputId": "331e2856-9b2d-4179-b017-9de85cebd8f9"
       },
       "outputs": [
         {
-          "name": "stdout",
-          "output_type": "stream",
-          "text": [
-            "[0]\tvalidation_0-error:0.08727\tvalidation_0-logloss:0.63186\tvalidation_1-error:0.19355\tvalidation_1-logloss:0.64377\n",
-            "[1]\tvalidation_0-error:0.08727\tvalidation_0-logloss:0.58163\tvalidation_1-error:0.19355\tvalidation_1-logloss:0.60726\n",
-            "[2]\tvalidation_0-error:0.09091\tvalidation_0-logloss:0.53791\tvalidation_1-error:0.22581\tvalidation_1-logloss:0.57581\n",
-            "[3]\tvalidation_0-error:0.09091\tvalidation_0-logloss:0.50050\tvalidation_1-error:0.22581\tvalidation_1-logloss:0.55041\n",
-            "[4]\tvalidation_0-error:0.09091\tvalidation_0-logloss:0.46685\tvalidation_1-error:0.22581\tvalidation_1-logloss:0.52272\n",
-            "[5]\tvalidation_0-error:0.09091\tvalidation_0-logloss:0.43845\tvalidation_1-error:0.22581\tvalidation_1-logloss:0.50777\n",
-            "[6]\tvalidation_0-error:0.09091\tvalidation_0-logloss:0.41247\tvalidation_1-error:0.22581\tvalidation_1-logloss:0.48711\n",
-            "[7]\tvalidation_0-error:0.09091\tvalidation_0-logloss:0.38838\tvalidation_1-error:0.22581\tvalidation_1-logloss:0.46815\n",
-            "[8]\tvalidation_0-error:0.09091\tvalidation_0-logloss:0.36835\tvalidation_1-error:0.22581\tvalidation_1-logloss:0.45237\n",
-            "[9]\tvalidation_0-error:0.09091\tvalidation_0-logloss:0.35047\tvalidation_1-error:0.22581\tvalidation_1-logloss:0.44714\n",
-            "[10]\tvalidation_0-error:0.09091\tvalidation_0-logloss:0.33574\tvalidation_1-error:0.22581\tvalidation_1-logloss:0.43789\n",
-            "[11]\tvalidation_0-error:0.08727\tvalidation_0-logloss:0.31980\tvalidation_1-error:0.19355\tvalidation_1-logloss:0.42302\n",
-            "[12]\tvalidation_0-error:0.08727\tvalidation_0-logloss:0.30535\tvalidation_1-error:0.19355\tvalidation_1-logloss:0.41391\n",
-            "[13]\tvalidation_0-error:0.08727\tvalidation_0-logloss:0.29338\tvalidation_1-error:0.19355\tvalidation_1-logloss:0.40946\n",
-            "[14]\tvalidation_0-error:0.08000\tvalidation_0-logloss:0.28159\tvalidation_1-error:0.19355\tvalidation_1-logloss:0.40213\n",
-            "[15]\tvalidation_0-error:0.08000\tvalidation_0-logloss:0.27257\tvalidation_1-error:0.19355\tvalidation_1-logloss:0.39593\n",
-            "[16]\tvalidation_0-error:0.06909\tvalidation_0-logloss:0.26163\tvalidation_1-error:0.16129\tvalidation_1-logloss:0.38322\n",
-            "[17]\tvalidation_0-error:0.06909\tvalidation_0-logloss:0.25379\tvalidation_1-error:0.16129\tvalidation_1-logloss:0.37926\n",
-            "[18]\tvalidation_0-error:0.06182\tvalidation_0-logloss:0.24516\tvalidation_1-error:0.16129\tvalidation_1-logloss:0.37100\n",
-            "[19]\tvalidation_0-error:0.06545\tvalidation_0-logloss:0.23986\tvalidation_1-error:0.16129\tvalidation_1-logloss:0.36972\n",
-            "[20]\tvalidation_0-error:0.05091\tvalidation_0-logloss:0.23403\tvalidation_1-error:0.16129\tvalidation_1-logloss:0.36283\n",
-            "[21]\tvalidation_0-error:0.05455\tvalidation_0-logloss:0.22609\tvalidation_1-error:0.16129\tvalidation_1-logloss:0.35755\n",
-            "[22]\tvalidation_0-error:0.05818\tvalidation_0-logloss:0.21755\tvalidation_1-error:0.19355\tvalidation_1-logloss:0.35068\n",
-            "[23]\tvalidation_0-error:0.05091\tvalidation_0-logloss:0.21052\tvalidation_1-error:0.16129\tvalidation_1-logloss:0.34074\n",
-            "[24]\tvalidation_0-error:0.04727\tvalidation_0-logloss:0.20283\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.33481\n",
-            "[25]\tvalidation_0-error:0.04364\tvalidation_0-logloss:0.19712\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.32824\n",
-            "[26]\tvalidation_0-error:0.04727\tvalidation_0-logloss:0.19110\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.32327\n",
-            "[27]\tvalidation_0-error:0.04727\tvalidation_0-logloss:0.18523\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.31702\n",
-            "[28]\tvalidation_0-error:0.04364\tvalidation_0-logloss:0.18141\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.31200\n",
-            "[29]\tvalidation_0-error:0.04364\tvalidation_0-logloss:0.17684\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.30695\n",
-            "[30]\tvalidation_0-error:0.04364\tvalidation_0-logloss:0.17189\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.29968\n",
-            "[31]\tvalidation_0-error:0.03636\tvalidation_0-logloss:0.16815\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.29345\n",
-            "[32]\tvalidation_0-error:0.03636\tvalidation_0-logloss:0.16321\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.29139\n",
-            "[33]\tvalidation_0-error:0.04000\tvalidation_0-logloss:0.16033\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.29363\n",
-            "[34]\tvalidation_0-error:0.03273\tvalidation_0-logloss:0.15760\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.29502\n",
-            "[35]\tvalidation_0-error:0.02909\tvalidation_0-logloss:0.15381\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.29333\n",
-            "[36]\tvalidation_0-error:0.03273\tvalidation_0-logloss:0.15091\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.29194\n",
-            "[37]\tvalidation_0-error:0.02909\tvalidation_0-logloss:0.14787\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.28378\n",
-            "[38]\tvalidation_0-error:0.02909\tvalidation_0-logloss:0.14556\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.27960\n",
-            "[39]\tvalidation_0-error:0.02909\tvalidation_0-logloss:0.14270\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.27994\n",
-            "[40]\tvalidation_0-error:0.02909\tvalidation_0-logloss:0.14010\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.27342\n",
-            "[41]\tvalidation_0-error:0.02909\tvalidation_0-logloss:0.13782\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.26785\n",
-            "[42]\tvalidation_0-error:0.02909\tvalidation_0-logloss:0.13642\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.26877\n",
-            "[43]\tvalidation_0-error:0.02909\tvalidation_0-logloss:0.13409\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.26514\n",
-            "[44]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.13172\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.25918\n",
-            "[45]\tvalidation_0-error:0.02182\tvalidation_0-logloss:0.13028\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.25702\n",
-            "[46]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.12822\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.25680\n",
-            "[47]\tvalidation_0-error:0.02182\tvalidation_0-logloss:0.12647\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.25468\n",
-            "[48]\tvalidation_0-error:0.02909\tvalidation_0-logloss:0.12520\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.25618\n",
-            "[49]\tvalidation_0-error:0.02182\tvalidation_0-logloss:0.12369\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.25155\n",
-            "[50]\tvalidation_0-error:0.01818\tvalidation_0-logloss:0.12152\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.24798\n",
-            "[51]\tvalidation_0-error:0.01818\tvalidation_0-logloss:0.12042\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.24572\n",
-            "[52]\tvalidation_0-error:0.02182\tvalidation_0-logloss:0.11867\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.24142\n",
-            "[53]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.11706\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.24160\n",
-            "[54]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.11559\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.24239\n",
-            "[55]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.11451\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.24140\n",
-            "[56]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.11357\tvalidation_1-error:0.12903\tvalidation_1-logloss:0.24278\n",
-            "[57]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.11213\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.24130\n",
-            "[58]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.11077\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.23772\n",
-            "[59]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.10933\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.23414\n",
-            "[60]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.10822\tvalidation_1-error:0.06452\tvalidation_1-logloss:0.23464\n",
-            "[61]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.10712\tvalidation_1-error:0.06452\tvalidation_1-logloss:0.23152\n",
-            "[62]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.10608\tvalidation_1-error:0.06452\tvalidation_1-logloss:0.23002\n",
-            "[63]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.10510\tvalidation_1-error:0.06452\tvalidation_1-logloss:0.22924\n",
-            "[64]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.10397\tvalidation_1-error:0.06452\tvalidation_1-logloss:0.22800\n",
-            "[65]\tvalidation_0-error:0.02182\tvalidation_0-logloss:0.10273\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22708\n",
-            "[66]\tvalidation_0-error:0.02182\tvalidation_0-logloss:0.10161\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22693\n",
-            "[67]\tvalidation_0-error:0.02545\tvalidation_0-logloss:0.10086\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22363\n",
-            "[68]\tvalidation_0-error:0.02182\tvalidation_0-logloss:0.10016\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22288\n",
-            "[69]\tvalidation_0-error:0.01818\tvalidation_0-logloss:0.09890\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22196\n",
-            "[70]\tvalidation_0-error:0.01818\tvalidation_0-logloss:0.09787\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22187\n"
-          ]
-        },
-        {
-          "name": "stdout",
-          "output_type": "stream",
-          "text": [
-            "[71]\tvalidation_0-error:0.01818\tvalidation_0-logloss:0.09703\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22033\n",
-            "[72]\tvalidation_0-error:0.01455\tvalidation_0-logloss:0.09607\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22085\n",
-            "[73]\tvalidation_0-error:0.01455\tvalidation_0-logloss:0.09542\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.21858\n",
-            "[74]\tvalidation_0-error:0.01455\tvalidation_0-logloss:0.09462\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.21853\n",
-            "[75]\tvalidation_0-error:0.01455\tvalidation_0-logloss:0.09419\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.21885\n",
-            "[76]\tvalidation_0-error:0.01455\tvalidation_0-logloss:0.09361\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22028\n",
-            "[77]\tvalidation_0-error:0.01455\tvalidation_0-logloss:0.09292\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.21975\n",
-            "[78]\tvalidation_0-error:0.01455\tvalidation_0-logloss:0.09188\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22108\n",
-            "[79]\tvalidation_0-error:0.01455\tvalidation_0-logloss:0.09123\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22129\n",
-            "[80]\tvalidation_0-error:0.01455\tvalidation_0-logloss:0.09050\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22190\n",
-            "[81]\tvalidation_0-error:0.01455\tvalidation_0-logloss:0.08982\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22301\n",
-            "[82]\tvalidation_0-error:0.01455\tvalidation_0-logloss:0.08913\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22500\n",
-            "[83]\tvalidation_0-error:0.01091\tvalidation_0-logloss:0.08842\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22531\n",
-            "[84]\tvalidation_0-error:0.01091\tvalidation_0-logloss:0.08786\tvalidation_1-error:0.09677\tvalidation_1-logloss:0.22341\n"
-          ]
-        },
+          "data": {
+            "text/plain": [
+              "0    Bachelor\n",
+              "1    Bachelor\n",
+              "2    Bachelor\n",
+              "3    Bachelor\n",
+              "4    Bachelor\n",
+              "5    Bachelor\n",
+              "6     College\n",
+              "Name: Education, dtype: object"
+            ]
+          },
+          "execution_count": 8,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "data1['Education'].head(7)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "15846918",
+      "metadata": {
+        "id": "15846918"
+      },
+      "source": [
+        "### 1.6 Group the data using education and name the data set data1_edu."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "79e2546a",
+      "metadata": {
+        "id": "79e2546a"
+      },
+      "outputs": [],
+      "source": [
+        "data1_edu = data1.groupby(['Education'])"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "03f128bc",
+      "metadata": {
+        "id": "03f128bc"
+      },
+      "source": [
+        "### 1.7 Calculate the mean of Clv for the grouped data."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "6e572eea",
+      "metadata": {
+        "id": "6e572eea",
+        "outputId": "54780e81-f99f-4853-bfa6-ff5a97f5b0e0"
+      },
+      "outputs": [
         {
           "data": {
             "text/plain": [
-              "XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1,\n",
-              "              colsample_bynode=1, colsample_bytree=1, enable_categorical=False,\n",
-              "              gamma=0, gpu_id=-1, importance_type=None,\n",
-              "              interaction_constraints='', learning_rate=0.1, max_delta_step=0,\n",
-              "              max_depth=4, min_child_weight=1, missing=nan,\n",
-              "              monotone_constraints='()', n_estimators=200, n_jobs=8,\n",
-              "              num_parallel_tree=1, predictor='auto', random_state=0,\n",
-              "              reg_alpha=0, reg_lambda=1, scale_pos_weight=1, subsample=0.9,\n",
-              "              tree_method='exact', validate_parameters=1, verbosity=None)"
+              "Education\n",
+              "Bachelor                7872.660412\n",
+              "College                 7851.064644\n",
+              "Doctor                  7520.344837\n",
+              "High School or Below    8296.709033\n",
+              "Master                  8243.484692\n",
+              "Name: Clv, dtype: float64"
             ]
           },
           "execution_count": 10,
@@ -577,205 +529,492 @@
         }
       ],
       "source": [
-        "model = xgb.XGBClassifier(max_depth=4,\n",
-        "                        subsample=0.9,\n",
-        "                        objective='binary:logistic',\n",
-        "                        n_estimators=200,\n",
-        "                        learning_rate = 0.1)\n",
-        "# train_x, test_x, train_Y, test_Y = train_test_split(X, Y, test_size=0.1, stratify=Y, random_state=0)\n",
-        "eval_set = [(train_x, train_Y), (test_x, test_Y)]\n",
-        "\n",
-        "model.fit(train_x, train_Y.values.ravel(), early_stopping_rounds=10, eval_metric=[\"error\", \"logloss\"], eval_set=eval_set, verbose=True)"
+        "data1_edu.Clv.mean()"
       ]
     },
     {
       "cell_type": "markdown",
+      "id": "595b45c4",
       "metadata": {
-        "id": "VgBHftHQxyo1"
+        "id": "595b45c4"
       },
       "source": [
-        "###### To evaluate training accuracy, I execute model.predict function and passing X testing data frame. The function returns an array of predictions per each row for X set. Then I match each row from prediction array with actual decision feature value. This is how accuracy is calculated:"
+        "### 1.8 Group using two variables Education and Gender, then calculate the mean of Clv"
       ]
     },
     {
       "cell_type": "code",
       "execution_count": null,
+      "id": "7421b674",
       "metadata": {
-        "id": "FxJC7-9lxyo1"
+        "id": "7421b674",
+        "outputId": "a4d051f0-d8d0-4a18-d0d3-a2b71a2e9f1f"
+      },
+      "outputs": [
+        {
+          "data": {
+            "text/plain": [
+              "Education             Gender\n",
+              "Bachelor              F         8012.877921\n",
+              "                      M         7722.072099\n",
+              "College               F         7732.833339\n",
+              "                      M         7971.342089\n",
+              "Doctor                F         7423.630380\n",
+              "                      M         7614.823122\n",
+              "High School or Below  F         8578.995840\n",
+              "                      M         8010.082690\n",
+              "Master                F         8319.111562\n",
+              "                      M         8158.078485\n",
+              "Name: Clv, dtype: float64"
+            ]
+          },
+          "execution_count": 11,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "data1.groupby(['Education','Gender']).Clv.mean()"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "91bb2ab1",
+      "metadata": {
+        "id": "91bb2ab1"
+      },
+      "source": [
+        "### 1.9 Make a histogram of Clv"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "45c4f7eb",
+      "metadata": {
+        "id": "45c4f7eb",
+        "outputId": "c3d09992-65e2-49c9-eda1-083281e0b631"
+      },
+      "outputs": [
+        {
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "needs_background": "light"
+          },
+          "output_type": "display_data"
+        }
+      ],
+      "source": [
+        "data1.Clv.hist()\n",
+        "plt.title('Histogram of Clv')\n",
+        "plt.xlabel('Clv')\n",
+        "plt.ylabel('Frequency')\n",
+        "plt.savefig('hist_Clv')"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "8a649a4d",
+      "metadata": {
+        "id": "8a649a4d"
+      },
+      "source": [
+        "# Q2"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "ce3809a8",
+      "metadata": {
+        "id": "ce3809a8"
       },
       "outputs": [],
       "source": [
-        "# make predictions for test data\n",
-        "y_pred = model.predict(test_x)\n",
-        "predictions = [round(value) for value in y_pred]"
-      ]
-    },
-    {
-      "cell_type": "code",
-      "execution_count": null,
-      "metadata": {
-        "id": "H9jHccT6xyo1",
-        "outputId": "ea781391-4293-4946-e678-8e5978319b4c"
-      },
-      "outputs": [
-        {
-          "name": "stdout",
-          "output_type": "stream",
-          "text": [
-            "Accuracy: 90.32%\n"
-          ]
-        }
-      ],
-      "source": [
-        "# evaluate predictions\n",
-        "accuracy = accuracy_score(test_Y, predictions)\n",
-        "print(\"Accuracy: %.2f%%\" % (accuracy * 100.0))"
-      ]
-    },
-    {
-      "cell_type": "code",
-      "execution_count": null,
-      "metadata": {
-        "id": "lUnzEKNvxyo1",
-        "outputId": "7d520d7d-214c-41f1-e190-fed343d5d120"
-      },
-      "outputs": [
-        {
-          "name": "stdout",
-          "output_type": "stream",
-          "text": [
-            "Fitting 10 folds for each of 96 candidates, totalling 960 fits\n",
-            "[00:18:47] WARNING: C:/Users/Administrator/workspace/xgboost-win64_release_1.5.1/src/learner.cc:1115: Starting in XGBoost 1.3.0, the default evaluation metric used with the objective 'binary:logistic' was changed from 'error' to 'logloss'. Explicitly set eval_metric if you'd like to restore the old behavior.\n",
-            "Best parameters: {'learning_rate': 0.1, 'max_depth': 3, 'n_estimators': 100}\n"
-          ]
-        }
-      ],
-      "source": [
-        "from sklearn.model_selection import GridSearchCV\n",
-        "parameters = {\n",
-        "    'max_depth': range (2, 10, 1),\n",
-        "    'n_estimators': range(60, 220, 40),\n",
-        "    'learning_rate': [0.1, 0.01, 0.05]\n",
-        "}\n",
-        "\n",
-        "#Initialise XGBoost Model\n",
-        "xgb1 = xgb.XGBClassifier(subsample=0.9, objective='binary:logistic')\n",
-        "\n",
-        "# Define grid search\n",
-        "grid_search= GridSearchCV(\n",
-        "    estimator=xgb1,\n",
-        "    param_grid=parameters,\n",
-        "    scoring = 'roc_auc',\n",
-        "    n_jobs = 10,\n",
-        "    cv = 10,\n",
-        "    verbose=True\n",
-        ")\n",
-        "\n",
-        "# Fit grid search\n",
-        "model1 = grid_search.fit(train_x,train_Y)\n",
-        "print(\"Best parameters:\", model1.best_params_)"
-      ]
-    },
-    {
-      "cell_type": "code",
-      "execution_count": null,
-      "metadata": {
-        "id": "mleXwyjvxyo1",
-        "outputId": "d4b9559e-e7a5-44a8-c13a-8af2339c8809"
-      },
-      "outputs": [
-        {
-          "name": "stdout",
-          "output_type": "stream",
-          "text": [
-            "Best AUC Score: 0.9767094017094017\n",
-            "Accuracy: 0.9032258064516129\n",
-            "[[15  2]\n",
-            " [ 1 13]]\n"
-          ]
-        }
-      ],
-      "source": [
-        "from sklearn.metrics import confusion_matrix\n",
-        "predict1 = model1.predict(test_x)\n",
-        "print('Best AUC Score: {}'.format(model1.best_score_))\n",
-        "print('Accuracy: {}'.format(accuracy_score(test_Y, predict1)))\n",
-        "print(confusion_matrix(test_Y,predict1))"
-      ]
-    },
-    {
-      "cell_type": "code",
-      "execution_count": null,
-      "metadata": {
-        "id": "MZSh1uthxyo1",
-        "outputId": "4950278b-8b40-4493-80c7-0de011b14198"
-      },
-      "outputs": [
-        {
-          "name": "stdout",
-          "output_type": "stream",
-          "text": [
-            "[1.5100325e-02 8.8246174e-02 9.2017984e-01 1.3721527e-02 2.2550551e-03\n",
-            " 1.5940575e-01 8.5871282e-04 9.9002153e-01 6.1288571e-01 1.8745381e-02\n",
-            " 3.6624399e-01 7.4888176e-01 6.1174178e-01 9.8159790e-01 9.5425004e-01\n",
-            " 2.2163162e-01 2.2163318e-02 1.1720129e-02 9.1634393e-01 9.0719599e-01\n",
-            " 9.9571818e-01 1.5629703e-02 9.7032243e-01 3.9174223e-01 9.5023459e-01\n",
-            " 9.5023459e-01 2.1503465e-02 6.1680382e-01 9.5023459e-01 9.1174664e-03\n",
-            " 1.1916337e-02]\n"
-          ]
-        }
-      ],
-      "source": [
-        "test_probs = model1.predict_proba(test_x)[:,1]\n",
-        "print(test_probs)"
+        "# dataset\n",
+        "from sklearn.datasets import load_boston\n",
+        "boston = load_boston()\n",
+        "# def explanatory and reponse variables\n",
+        "X = pd.DataFrame(boston.data, columns=boston.feature_names)\n",
+        "Y = pd.DataFrame(boston.target)"
       ]
     },
     {
       "cell_type": "markdown",
+      "id": "bbc6b802",
       "metadata": {
-        "id": "ezxCwBSpxyo1"
+        "id": "bbc6b802"
       },
       "source": [
-        "#####  Executed model.predict with test data complete. But how to execute model.predict with new data? Here is the example below, which feeds model.predict with Pandas data frame constructed from static data. Payment is by one day late (payment after 4 days since invoice vs. 3 days of expected payment), but since the amount is less than 80 — such payment delay is not considered risky. XGBoost model.predict returns decision, but often it might be useful to call model.predict_proba instead, which returns probabilities for the decision:"
+        "### 2.1    Create a training data set and a test data set such that the test data set contains randomly 20% of the data set. Set the random seed to be 40. Implement Lasso regression with parameter set to be 0.1 on the training data. Report the estimated regression coefficients."
       ]
     },
     {
       "cell_type": "code",
       "execution_count": null,
+      "id": "e4fca461",
       "metadata": {
-        "id": "J-y_sTyZxyo1",
-        "outputId": "9bfb8024-6897-41e0-ff5c-33c78904da2e"
+        "id": "e4fca461"
+      },
+      "outputs": [],
+      "source": [
+        "# split dataset into training and test data\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=40)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "0d9d37f4",
+      "metadata": {
+        "id": "0d9d37f4",
+        "outputId": "3f0c3c56-f9f3-462c-8197-c6c1a88e7208"
+      },
+      "outputs": [
+        {
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>CRIM</th>\n",
+              "      <th>ZN</th>\n",
+              "      <th>INDUS</th>\n",
+              "      <th>CHAS</th>\n",
+              "      <th>NOX</th>\n",
+              "      <th>RM</th>\n",
+              "      <th>AGE</th>\n",
+              "      <th>DIS</th>\n",
+              "      <th>RAD</th>\n",
+              "      <th>TAX</th>\n",
+              "      <th>PTRATIO</th>\n",
+              "      <th>B</th>\n",
+              "      <th>LSTAT</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>0.00632</td>\n",
+              "      <td>18.0</td>\n",
+              "      <td>2.31</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0.538</td>\n",
+              "      <td>6.575</td>\n",
+              "      <td>65.2</td>\n",
+              "      <td>4.0900</td>\n",
+              "      <td>1.0</td>\n",
+              "      <td>296.0</td>\n",
+              "      <td>15.3</td>\n",
+              "      <td>396.90</td>\n",
+              "      <td>4.98</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>0.02731</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>7.07</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0.469</td>\n",
+              "      <td>6.421</td>\n",
+              "      <td>78.9</td>\n",
+              "      <td>4.9671</td>\n",
+              "      <td>2.0</td>\n",
+              "      <td>242.0</td>\n",
+              "      <td>17.8</td>\n",
+              "      <td>396.90</td>\n",
+              "      <td>9.14</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>0.02729</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>7.07</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0.469</td>\n",
+              "      <td>7.185</td>\n",
+              "      <td>61.1</td>\n",
+              "      <td>4.9671</td>\n",
+              "      <td>2.0</td>\n",
+              "      <td>242.0</td>\n",
+              "      <td>17.8</td>\n",
+              "      <td>392.83</td>\n",
+              "      <td>4.03</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>0.03237</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>2.18</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0.458</td>\n",
+              "      <td>6.998</td>\n",
+              "      <td>45.8</td>\n",
+              "      <td>6.0622</td>\n",
+              "      <td>3.0</td>\n",
+              "      <td>222.0</td>\n",
+              "      <td>18.7</td>\n",
+              "      <td>394.63</td>\n",
+              "      <td>2.94</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>0.06905</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>2.18</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0.458</td>\n",
+              "      <td>7.147</td>\n",
+              "      <td>54.2</td>\n",
+              "      <td>6.0622</td>\n",
+              "      <td>3.0</td>\n",
+              "      <td>222.0</td>\n",
+              "      <td>18.7</td>\n",
+              "      <td>396.90</td>\n",
+              "      <td>5.33</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "      CRIM    ZN  INDUS  CHAS    NOX     RM   AGE     DIS  RAD    TAX  \\\n",
+              "0  0.00632  18.0   2.31   0.0  0.538  6.575  65.2  4.0900  1.0  296.0   \n",
+              "1  0.02731   0.0   7.07   0.0  0.469  6.421  78.9  4.9671  2.0  242.0   \n",
+              "2  0.02729   0.0   7.07   0.0  0.469  7.185  61.1  4.9671  2.0  242.0   \n",
+              "3  0.03237   0.0   2.18   0.0  0.458  6.998  45.8  6.0622  3.0  222.0   \n",
+              "4  0.06905   0.0   2.18   0.0  0.458  7.147  54.2  6.0622  3.0  222.0   \n",
+              "\n",
+              "   PTRATIO       B  LSTAT  \n",
+              "0     15.3  396.90   4.98  \n",
+              "1     17.8  396.90   9.14  \n",
+              "2     17.8  392.83   4.03  \n",
+              "3     18.7  394.63   2.94  \n",
+              "4     18.7  396.90   5.33  "
+            ]
+          },
+          "execution_count": 15,
+          "metadata": {},
+          "output_type": "execute_result"
+        }
+      ],
+      "source": [
+        "# Check the value of coveriates. Some coveriates (TAX, B) are pretty larger than others. We need to normalize the data so that all coveriates can be penalized equally.\n",
+        "X.head()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "e17cd4bf",
+      "metadata": {
+        "id": "e17cd4bf",
+        "outputId": "cb517ba3-b82b-4c38-93dc-f41ee56f1b00"
       },
       "outputs": [
         {
           "name": "stdout",
           "output_type": "stream",
           "text": [
-            "Prediction:  [0]\n",
-            "Probabilities:  [[0.81825465 0.18174534]]\n"
+            "    Columns  Coefficient Estimate\n",
+            "0      CRIM             -0.000000\n",
+            "1        ZN              0.000000\n",
+            "2     INDUS             -0.000000\n",
+            "3      CHAS              0.000000\n",
+            "4       NOX             -0.000000\n",
+            "5        RM              3.241256\n",
+            "6       AGE             -0.000000\n",
+            "7       DIS              0.000000\n",
+            "8       RAD             -0.000000\n",
+            "9       TAX             -0.000000\n",
+            "10  PTRATIO             -0.275773\n",
+            "11        B              0.000000\n",
+            "12    LSTAT             -0.457000\n"
           ]
         }
       ],
       "source": [
-        "# Predict on new observations\n",
-        "headers = list(X)\n",
-        "input_variables = pd.DataFrame([[3,4,50.75,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],\n",
-        "                                columns=headers,\n",
-        "                                dtype=float,\n",
-        "                                index=['input'])\n",
+        "from sklearn.linear_model import Lasso\n",
+        "lasso = Lasso(alpha=0.1, normalize=True) # Set normalize = True here to normalize the coveriates\n",
+        "lasso.fit(X_train, y_train)\n",
         "\n",
-        "# Get the model's prediction\n",
-        "prediction = model1.predict(input_variables)\n",
-        "print(\"Prediction: \", prediction)\n",
-        "prediction_proba = model1.predict_proba(input_variables)\n",
-        "print(\"Probabilities: \", prediction_proba)"
+        "lasso_coeff = pd.DataFrame()\n",
+        "lasso_coeff[\"Columns\"] = X_train.columns\n",
+        "lasso_coeff['Coefficient Estimate'] = pd.Series(lasso.coef_)\n",
+        "\n",
+        "print(lasso_coeff)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "0d9ef2b3",
+      "metadata": {
+        "id": "0d9ef2b3"
+      },
+      "source": [
+        "### 2.2 Evaluate the above fitted Lasso model on the test data and report the RMSE."
       ]
     },
     {
       "cell_type": "code",
       "execution_count": null,
+      "id": "3df840ff",
       "metadata": {
-        "id": "M5SsaI5dxyo2"
+        "id": "3df840ff",
+        "outputId": "45e6c94d-ba13-4c5e-890b-cc98b85900f3"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "test RMSE 6.799086922121378\n"
+          ]
+        }
+      ],
+      "source": [
+        "from sklearn.metrics import mean_squared_error\n",
+        "y_pred = lasso.predict(X_test)\n",
+        "rmse = np.sqrt(mean_squared_error(y_pred, y_test))\n",
+        "print(\"test RMSE\", rmse)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "aed0d729",
+      "metadata": {
+        "id": "aed0d729"
+      },
+      "source": [
+        "### 2.3 Select the tuning parameter for Lasso using a 10-fold cross-validation. What is your selected tuning parameter value?"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "9e8cddd4",
+      "metadata": {
+        "id": "9e8cddd4",
+        "outputId": "71633ef9-b2f6-4c44-8a49-25f72e5b2ffe"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Alpha= 0.0007470271276290051\n"
+          ]
+        }
+      ],
+      "source": [
+        "from sklearn.linear_model import LassoCV\n",
+        "lassocv = LassoCV(alphas=None, cv=10, max_iter=100000, normalize=True)# Still set normalize = True here to normalize the coveriates\n",
+        "lassocv.fit(X_train, y_train.values.ravel())\n",
+        "print(\"Alpha=\", lassocv.alpha_)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "d27e7b03",
+      "metadata": {
+        "id": "d27e7b03"
+      },
+      "source": [
+        "### 2.4 Use the chosen tuning parameter to fit the final model on the training data. Report the estimated coefficients. Evaluate the final model on the test data and report the RMSE."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "632b4e08",
+      "metadata": {
+        "id": "632b4e08",
+        "outputId": "8c714c61-dd4b-40ab-9b61-042ae4eb11a5"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "    Columns  Coefficient Estimate\n",
+            "0      CRIM             -0.120047\n",
+            "1        ZN              0.040011\n",
+            "2     INDUS             -0.014029\n",
+            "3      CHAS              2.698146\n",
+            "4       NOX            -15.479616\n",
+            "5        RM              4.002240\n",
+            "6       AGE             -0.003226\n",
+            "7       DIS             -1.294676\n",
+            "8       RAD              0.262500\n",
+            "9       TAX             -0.010813\n",
+            "10  PTRATIO             -0.881130\n",
+            "11        B              0.005803\n",
+            "12    LSTAT             -0.525642\n"
+          ]
+        }
+      ],
+      "source": [
+        "lasso.set_params(alpha=lassocv.alpha_) #Call the previous model and just change the alpha. The remaining settings won't be changed here.\n",
+        "                                       #Thus 'normalize' is still True here.\n",
+        "lasso.fit(X_train, y_train)\n",
+        "\n",
+        "lasso_coeff_cv = pd.DataFrame()\n",
+        "lasso_coeff_cv[\"Columns\"] = X_train.columns\n",
+        "lasso_coeff_cv['Coefficient Estimate'] = pd.Series(lasso.coef_)\n",
+        "\n",
+        "print(lasso_coeff_cv)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "96b7bc30",
+      "metadata": {
+        "id": "96b7bc30",
+        "outputId": "bcc0ddcf-ba7d-465b-d945-02d08c22f44b"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "test RMSE : 5.832703561823408\n"
+          ]
+        }
+      ],
+      "source": [
+        "y_pred_cv = lasso.predict(X_test)\n",
+        "rmse_cv = np.sqrt(mean_squared_error(y_pred_cv, y_test))\n",
+        "print(\"test RMSE :\", rmse_cv)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "ae0f7040",
+      "metadata": {
+        "id": "ae0f7040"
       },
       "outputs": [],
       "source": []
@@ -783,7 +1022,7 @@
   ],
   "metadata": {
     "kernelspec": {
-      "display_name": "Python 3",
+      "display_name": "Python 3 (ipykernel)",
       "language": "python",
       "name": "python3"
     },
@@ -797,7 +1036,7 @@
       "name": "python",
       "nbconvert_exporter": "python",
       "pygments_lexer": "ipython3",
-      "version": "3.7.4"
+      "version": "3.9.7"
     },
     "colab": {
       "provenance": [],
@@ -805,5 +1044,5 @@
     }
   },
   "nbformat": 4,
-  "nbformat_minor": 0
+  "nbformat_minor": 5
 }

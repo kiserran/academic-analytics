@@ -1,2 +1,2 @@
 # academic-analytics
-Graduate analytics projects demonstrating applied python, ml, and visualization techniques
+Projects demonstrating applied python, ml, LLM and visualization techniques
